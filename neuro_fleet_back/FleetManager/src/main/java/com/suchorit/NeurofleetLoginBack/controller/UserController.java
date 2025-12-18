@@ -2,6 +2,7 @@ package com.suchorit.NeurofleetLoginBack.controller;
 
 
 import com.suchorit.NeurofleetLoginBack.model.FleetManagerData;
+import com.suchorit.NeurofleetLoginBack.model.OverSpeedingData;
 import com.suchorit.NeurofleetLoginBack.model.ShowVehicle;
 import com.suchorit.NeurofleetLoginBack.model.Vehicle;
 import com.suchorit.NeurofleetLoginBack.service.JwtService;
@@ -58,8 +59,8 @@ public class UserController {
     }
     @PostMapping("/updateVehicle")
     public ResponseEntity<Vehicle> updateVehicle
-            (@RequestHeader("Authorization") String authHeader, @RequestBody Vehicle vehicle){
-        return userService.addVehicle(authHeader,vehicle);
+            (@RequestParam String regNo, @RequestParam double fuel){
+        return userService.updateVehicle(regNo,fuel);
     }
     @PostMapping("/seeVehicles")
     public ResponseEntity<List<ShowVehicle>> seeVehicles(@RequestHeader("Authorization") String authHeader){
@@ -73,5 +74,8 @@ public class UserController {
     public ResponseEntity<Map<String,String>> deleteVehicle(@RequestParam("regNo") String regNo){
         return userService.deleteVehicle(regNo);
     }
-
+    @PostMapping("/overSpeeding")
+    public ResponseEntity<Map<String,String>> overSpeeding(@RequestBody OverSpeedingData overSpeedingData){
+        return userService.overSpeeding(overSpeedingData);
+    }
 }

@@ -84,7 +84,8 @@ export default function Hero({ showProfile }) {
   };
 
   return (
-    <div className="hero-container">
+    <div className="hero-container"
+    /* style={{marginTop:"100px"}}*/>
 
      
 
@@ -104,7 +105,7 @@ export default function Hero({ showProfile }) {
             <MapContainer
               center={[coords.lat, coords.lng]}
               zoom={13}
-              style={{ height: "300px", width: "100%", borderRadius: "10px" }}
+              style={{ height: "300px", width: "100%", borderRadius: "10px"}}
             >
               <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
               <Marker position={[coords.lat, coords.lng]}>

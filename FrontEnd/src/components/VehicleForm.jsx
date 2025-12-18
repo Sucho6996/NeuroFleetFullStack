@@ -7,6 +7,7 @@ export default function VehicleForm({ onSuccess }) {
   const [location, setLocation] = useState("");
   const [fuel, setFuel] = useState("");
   const [type, setType] = useState("");
+  const [status, setStatus] = useState("");
   const [licenseNo, setLicenseNo] = useState("");
 
   const token = localStorage.getItem("token");
@@ -20,6 +21,7 @@ export default function VehicleForm({ onSuccess }) {
       location,
       fuel: parseFloat(fuel),
       type,
+      status,
       licenseNo
     };
 
@@ -42,6 +44,7 @@ export default function VehicleForm({ onSuccess }) {
         setLocation("");
         setFuel("");
         setType("");
+        setStatus("");
         setLicenseNo("");
 
         if (onSuccess) onSuccess();
@@ -100,6 +103,14 @@ export default function VehicleForm({ onSuccess }) {
           placeholder="Vehicle Type (Truck, Van, Car...)"
           value={type}
           onChange={(e) => setType(e.target.value)}
+          required
+        />
+
+        <input
+          type="text"
+          placeholder="Status(In Use,Idle)"
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
           required
         />
 

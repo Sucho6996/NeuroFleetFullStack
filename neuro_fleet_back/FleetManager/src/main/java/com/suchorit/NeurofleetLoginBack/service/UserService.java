@@ -2,10 +2,8 @@ package com.suchorit.NeurofleetLoginBack.service;
 
 
 import com.suchorit.NeurofleetLoginBack.controller.DriverFeign;
-import com.suchorit.NeurofleetLoginBack.model.DriverData;
-import com.suchorit.NeurofleetLoginBack.model.FleetManagerData;
-import com.suchorit.NeurofleetLoginBack.model.ShowVehicle;
-import com.suchorit.NeurofleetLoginBack.model.Vehicle;
+import com.suchorit.NeurofleetLoginBack.model.*;
+import com.suchorit.NeurofleetLoginBack.repo.OverSpeedingRepo;
 import com.suchorit.NeurofleetLoginBack.repo.UserRepo;
 import com.suchorit.NeurofleetLoginBack.repo.VehicleRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +27,8 @@ public class UserService {
     UserRepo userRepo;
     @Autowired
     VehicleRepo vehicleRepo;
+    @Autowired
+    OverSpeedingRepo overSpeedingRepo;
     @Autowired
     AuthenticationManager authenticationManager;
     @Autowired
@@ -126,6 +126,8 @@ public class UserService {
             showVehicle.setLocation(vehicle.getLocation());
             showVehicle.setFuel(vehicle.getFuel());
             showVehicle.setType(vehicle.getType());
+            showVehicle.setStatus(vehicle.getStatus());
+            showVehicle.setDistanceCovered(vehicle.getDistanceCovered());
 
             DriverData driverData=driverFeign.getProf(vehicle.getLicenseNo()).getBody();
             showVehicle.setDriverName(driverData.getName());
@@ -144,6 +146,35 @@ public class UserService {
             response.put("message","Deleted Successfully");
         }catch (Exception e){
             response.put("error",e.getMessage());
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    public ResponseEntity<Vehicle> updateVehicle(String regNo, double fuel) {
+        Vehicle vehicle=vehicleRepo.findById(regNo).orElse(new Vehicle());
+        vehicle.setFuel(fuel);
+        vehicle.setDistanceCovered(vehicle.getDistanceCovered()+50);
+        try {
+            if((int)vehicle.getFuel()<=0){
+                vehicle.setFuel(0);
+                vehicle.setStatus("Maintenance");
+            }
+            vehicleRepo.save(vehicle);
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+            return ResponseEntity.badRequest().body(new Vehicle());
+        }
+        return ResponseEntity.ok(vehicle);
+    }
+
+
+    public ResponseEntity<Map<String, String>> overSpeeding(OverSpeedingData overSpeedingData) {
+        Map<String, String> response=new HashMap<>();
+        try{
+            overSpeedingRepo.save(overSpeedingData);
+            response.put("message","Successfully");
+        }catch (Exception e){
+            response.put("message",e.getMessage());
         }
         return ResponseEntity.ok(response);
     }

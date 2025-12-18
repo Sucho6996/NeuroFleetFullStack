@@ -4,7 +4,8 @@
 
 /* Move dashboard upward & center content */
 .dashboard-wrapper {
-  padding-top: 170px;     
+  margin-top: 100px;
+  /* padding-top: 170px;      */
   width: 100%;
   text-align: center;
 }
@@ -30,12 +31,12 @@
   justify-content: flex-start;   /* LEFT aligned */
   margin-left: 50px;             /* space from left */
   margin-bottom: 10px;
+  
 }
 
 .tab-button-row {
   display: flex;
   gap: 15px;
-
   background: transparent;        /* remove dark background */
   padding: 0;
   border: none;
@@ -129,7 +130,7 @@
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 20px;
   margin-top: 20px;
-  padding: 10px 20px;
+  /* padding: 10px 20px; */
 }
 
 .vehicle-card {
@@ -137,7 +138,7 @@
   padding: 18px 20px;
   border-radius: 14px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  min-height: 200px;
+  /* min-height: 200px; */
   text-align: left;
   transition: 0.2s;
 }

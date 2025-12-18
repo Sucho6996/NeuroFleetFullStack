@@ -31,3 +31,5 @@ build/
 
 ### VS Code ###
 .vscode/
+
+neuro_fleet_back/Driver/src/main/resources/application.properties

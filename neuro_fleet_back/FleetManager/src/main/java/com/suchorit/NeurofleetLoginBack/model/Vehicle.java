@@ -20,8 +20,27 @@ public class Vehicle {
 //    protected Double latitude;
 //    protected Double longitude;
     protected double fuel;
+    protected String status;
     protected String type;
+    protected long distanceCovered;
     private String licenseNo;
+
+
+    public long getDistanceCovered() {
+        return distanceCovered;
+    }
+
+    public void setDistanceCovered(long distanceCovered) {
+        this.distanceCovered = distanceCovered;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
     public String getEmail() {
         return email;

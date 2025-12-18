@@ -7,6 +7,7 @@ export default function FleetManagerDashboard() {
   const [vehicles, setVehicles] = useState([]);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [myLocation, setMyLocation] = useState({ lat: null, lon: null });
+  const [alerts, setAlerts] = useState([]);
 
   const [stats, setStats] = useState({
     activeVehicles: 0,
@@ -29,18 +30,14 @@ export default function FleetManagerDashboard() {
   }, [activeTab]);
 
   /* ---------------------------------------
-     LOAD DASHBOARD STATS
+     DASHBOARD STATS
   --------------------------------------- */
   const fetchDashboardData = async () => {
     try {
       const res = await fetch(
         "http://localhost:8081/fleetManager/seeVehicles",
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` }
-        }
+        { method: "POST", headers: { Authorization: `Bearer ${token}` } }
       );
-
       const list = await res.json();
 
       setStats({
@@ -51,8 +48,8 @@ export default function FleetManagerDashboard() {
         activeDrivers: 18,
         weeklyRevenue: 150000
       });
-    } catch (err) {
-      console.error(err);
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -63,16 +60,12 @@ export default function FleetManagerDashboard() {
     try {
       const res = await fetch(
         "http://localhost:8081/fleetManager/seeVehicles",
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` }
-        }
+        { method: "POST", headers: { Authorization: `Bearer ${token}` } }
       );
-
       const list = await res.json();
       setVehicles(list);
-    } catch (err) {
-      console.error(err);
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -80,67 +73,125 @@ export default function FleetManagerDashboard() {
      MY LOCATION
   --------------------------------------- */
   const getMyLocation = () => {
-    if (!navigator.geolocation) {
-      alert("Geolocation not supported");
-      return;
-    }
+    if (!navigator.geolocation) return alert("Geolocation not supported");
 
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
+      (pos) =>
         setMyLocation({
           lat: pos.coords.latitude,
           lon: pos.coords.longitude
-        });
-      },
+        }),
       () => alert("Location access denied")
     );
   };
 
   /* ---------------------------------------
-     VEHICLE CLICK → DUMMY LIVE DATA
+     VEHICLE CLICK (LIVE DATA + ALERT)
   --------------------------------------- */
-  const handleVehicleClick = (vehicle) => {
-    const lat = 22.5726 + Math.random() / 100; // dummy area
-    const lon = 88.3639 + Math.random() / 100;
+  const handleVehicleClick = async (vehicle) => {
+    const liveLat = 22.5726 + Math.random() / 100;
+    const liveLon = 88.3639 + Math.random() / 100;
+
+    const liveFuel = Math.max(
+      vehicle.fuel - (Math.floor(Math.random() * 2) + 1),
+      0
+    );
+
+    const liveSpeed = Math.floor(Math.random() * 121); // 0–120 km/h
 
     setSelectedVehicle({
       ...vehicle,
-      liveLat: lat,
-      liveLon: lon,
-      liveFuel: Math.floor(Math.random() * 40) + 40,
-      liveSpeed: Math.floor(Math.random() * 60) + 20
+      liveLat,
+      liveLon,
+      liveFuel,
+      liveSpeed
     });
+
+    // 🔥 Optimistic UI fuel update
+    setVehicles((prev) =>
+      prev.map((v) =>
+        v.regNo === vehicle.regNo ? { ...v, fuel: liveFuel } : v
+      )
+    );
+    if(vehicle.distanceCovered>=1000){
+      // setAlerts((prev) => [alertObj, ...prev]);
+      alert(
+        `🚨 Servicing Needed for \nVehicle: ${vehicle.regNo}`
+      );
+    }
+
+    // 🚨 Overspeed Alert (Frontend-only)
+    if (liveSpeed >= 100) {
+      const alertObj = {
+        id: Date.now(),
+        regNo: vehicle.regNo,
+        type: "Overspeeding",
+        speed: liveSpeed,
+        time: new Date().toLocaleTimeString()
+      };
+
+      setAlerts((prev) => [alertObj, ...prev]);
+      alert(
+        `🚨 Overspeeding Alert!\nVehicle: ${vehicle.regNo}\nSpeed: ${liveSpeed} km/h`
+      );
+      try {
+        await fetch("http://localhost:8081/fleetManager/overSpeeding", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            regNo: vehicle.regNo,
+            time: alertObj.time,
+            speed: String(liveSpeed)   // backend expects String
+          })
+        });
+      } catch (err) {
+        console.error("Overspeeding API failed", err);
+      }
+    }
+
+    try {
+      await fetch(
+        `http://localhost:8081/fleetManager/updateVehicle?regNo=${vehicle.regNo}&fuel=${liveFuel}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        }
+      );
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   /* ---------------------------------------
      DELETE VEHICLE
   --------------------------------------- */
   const deleteVehicle = async (regNo) => {
-    const confirmDel = window.confirm(
-      `Are you sure you want to delete ${regNo}?`
-    );
-    if (!confirmDel) return;
+    if (!window.confirm(`Delete vehicle ${regNo}?`)) return;
 
     try {
       const res = await fetch(
         `http://localhost:8081/fleetManager/deleteVehicle?regNo=${regNo}`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` }
-        }
+        { method: "POST", headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (res.ok) {
-        alert("Vehicle deleted successfully!");
         loadVehicles();
         fetchDashboardData();
-      } else {
-        alert("Failed to delete vehicle");
       }
     } catch (e) {
       console.error(e);
-      alert("Error deleting vehicle");
     }
+  };
+
+  const closeModal = () => {
+    setSelectedVehicle(null);
+    loadVehicles();
   };
 
   /* ---------------------------------------
@@ -148,38 +199,34 @@ export default function FleetManagerDashboard() {
   --------------------------------------- */
   return (
     <div className="dashboard-wrapper">
-      <h2 className="dashboard-title">FLEET MANAGER DASHBOARD</h2>
+      <div><h2 className="dashboard-title"
+      style={{marginTop:"350px",color:"white",position:"relative"}}
+      >FLEET MANAGER DASHBOARD</h2></div>
+
+      {/* ALERTS */}
+      {/* {alerts.length > 0 && (
+        <div className="alert-box">
+          <h3>🚨 Active Alerts</h3>
+          {alerts.map((a) => (
+            <div key={a.id} className="alert-card">
+              <strong>{a.regNo}</strong> — {a.type} ({a.speed} km/h) @ {a.time}
+            </div>
+          ))}
+        </div>
+      )} */}
 
       {/* TABS */}
       <div className="tab-wrapper">
         <div className="tab-button-row">
-          <button
-            className={activeTab === "overview" ? "active-tab" : ""}
-            onClick={() => setActiveTab("overview")}
-          >
-            Overview
-          </button>
-
-          <button
-            className={activeTab === "addVehicle" ? "active-tab" : ""}
-            onClick={() => setActiveTab("addVehicle")}
-          >
-            Add Vehicle
-          </button>
-
-          <button
-            className={activeTab === "seeVehicles" ? "active-tab" : ""}
-            onClick={() => setActiveTab("seeVehicles")}
-          >
-            See Vehicles
-          </button>
-
-          <button
-            className={activeTab === "myLocation" ? "active-tab" : ""}
-            onClick={() => setActiveTab("myLocation")}
-          >
-            My Location
-          </button>
+          {["overview", "addVehicle", "seeVehicles", "myLocation"].map((t) => (
+            <button
+              key={t}
+              className={activeTab === t ? "active-tab" : ""}
+              onClick={() => setActiveTab(t)}
+            >
+              {t.replace(/^\w/, (c) => c.toUpperCase())}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -189,9 +236,13 @@ export default function FleetManagerDashboard() {
           <div className="card-box">Active Vehicles: {stats.activeVehicles}</div>
           <div className="card-box">Total Fleet Size: {stats.totalFleetSize}</div>
           <div className="card-box">Active Trips: {stats.activeTrips}</div>
-          <div className="card-box">Completed Trips: {stats.completedTrips}</div>
+          <div className="card-box">
+            Completed Trips: {stats.completedTrips}
+          </div>
           <div className="card-box">Active Drivers: {stats.activeDrivers}</div>
-          <div className="card-box">Weekly Revenue: ₹{stats.weeklyRevenue}</div>
+          <div className="card-box">
+            Weekly Revenue: ₹{stats.weeklyRevenue}
+          </div>
         </div>
       )}
 
@@ -204,81 +255,67 @@ export default function FleetManagerDashboard() {
 
       {/* SEE VEHICLES */}
       {activeTab === "seeVehicles" && (
-        <div className="vehicle-list">
-          <div className="vehicle-grid">
-            {vehicles.map((v) => (
-              <div
-                key={v.regNo}
-                className="vehicle-card"
-                onClick={() => handleVehicleClick(v)}
+        <div className="vehicle-grid"
+        style={{marginTop:"100px",paddingTop:"0px"}}>
+          {vehicles.map((v) => (
+            <div
+              key={v.regNo}
+              className={`vehicle-card ${
+                v.status === "Maintenance" ? "disabled" : ""
+              }`}
+              onClick={() =>
+                v.status !== "Maintenance" && handleVehicleClick(v)
+              }
+            >
+              <h3>{v.regNo}</h3>
+              <p>{v.name} ({v.type})</p>
+              <p>Driver: {v.driverName}</p>
+              <p>Fuel: {v.fuel}%</p>
+              <p>Distance Travelled: {v.distanceCovered}</p>
+              <p>Status: {v.status}</p>
+              
+              <button
+                className="delete-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  deleteVehicle(v.regNo);
+                }}
               >
-                <h3 className="vehicle-title">{v.regNo}</h3>
-                <p className="vehicle-sub">
-                  {v.name} ({v.type})
-                </p>
-                <p><strong>Driver:</strong> {v.driverName}</p>
-                <p><strong>Fuel:</strong> {v.fuel}%</p>
-
-                <button
-                  className="delete-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    deleteVehicle(v.regNo);
-                  }}
-                >
-                  Delete Vehicle
-                </button>
-              </div>
-            ))}
-          </div>
+                Delete
+              </button>
+            </div>
+          ))}
         </div>
       )}
 
       {/* MY LOCATION */}
       {activeTab === "myLocation" && (
         <div className="location-box">
-          <h3>My Current Location</h3>
-
           {myLocation.lat ? (
-            <>
-              <p>Latitude: {myLocation.lat}</p>
-              <p>Longitude: {myLocation.lon}</p>
-
-              <iframe
-                title="my-map"
-                width="100%"
-                height="350"
-                style={{ borderRadius: "10px", marginTop: "10px" }}
-                src={`https://maps.google.com/maps?q=${myLocation.lat},${myLocation.lon}&z=15&output=embed`}
-              />
-            </>
+            <iframe
+              title="my-map"
+              src={`https://maps.google.com/maps?q=${myLocation.lat},${myLocation.lon}&z=15&output=embed`}
+            />
           ) : (
             <p>Fetching location...</p>
           )}
         </div>
       )}
 
-      {/* ===============================
-          VEHICLE LIVE TRACKING POPUP
-      =============================== */}
+      {/* LIVE TRACKING MODAL */}
       {selectedVehicle && (
         <div className="modal-overlay">
           <div className="modal-content">
             <h2>Vehicle Live Tracking</h2>
-
-            <p><strong>Reg No:</strong> {selectedVehicle.regNo}</p>
-            <p><strong>Fuel:</strong> {selectedVehicle.liveFuel}%</p>
-            <p><strong>Speed:</strong> {selectedVehicle.liveSpeed} km/h</p>
-
+            <p>Reg No: {selectedVehicle.regNo}</p>
+            <p>Fuel: {selectedVehicle.liveFuel}%</p>
+            <p>Speed: {selectedVehicle.liveSpeed} km/h</p>
             <iframe
               title="vehicle-map"
               src={`https://maps.google.com/maps?q=${selectedVehicle.liveLat},${selectedVehicle.liveLon}&z=15&output=embed`}
             />
 
-            <button
-              className="modal-close-btn"
-              onClick={() => setSelectedVehicle(null)}
-            >
+            <button className="modal-close-btn" onClick={closeModal}>
               Close
             </button>
           </div>
