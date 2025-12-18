@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useRef } from "react";
 import "../styles/Dashboard.css";
 import VehicleForm from "./VehicleForm";
 
@@ -8,6 +8,10 @@ export default function FleetManagerDashboard() {
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [myLocation, setMyLocation] = useState({ lat: null, lon: null });
   const [alerts, setAlerts] = useState([]);
+  const speedIntervalRef = useRef(null);
+  const overspeedRef = useRef(false);
+  const serviceAlertRef = useRef(false);
+
 
   const [stats, setStats] = useState({
     activeVehicles: 0,
@@ -88,39 +92,83 @@ export default function FleetManagerDashboard() {
   /* ---------------------------------------
      VEHICLE CLICK (LIVE DATA + ALERT)
   --------------------------------------- */
-  const handleVehicleClick = async (vehicle) => {
-    const liveLat = 22.5726 + Math.random() / 100;
-    const liveLon = 88.3639 + Math.random() / 100;
+ const handleVehicleClick = async (vehicle) => {
+  // 🚫 Do nothing if already out of fuel
+  
 
-    const liveFuel = Math.max(
-      vehicle.fuel - (Math.floor(Math.random() * 2) + 1),
-      0
-    );
+  // clear previous interval
+  if (speedIntervalRef.current) {
+    clearInterval(speedIntervalRef.current);
+  }
 
-    const liveSpeed = Math.floor(Math.random() * 121); // 0–120 km/h
+  const liveLat = 22.5726 + Math.random() / 100;
+  const liveLon = 88.3639 + Math.random() / 100;
 
-    setSelectedVehicle({
-      ...vehicle,
-      liveLat,
-      liveLon,
-      liveFuel,
-      liveSpeed
-    });
+  let liveFuel = Math.max(
+    vehicle.fuel - (Math.floor(Math.random() * 2) + 1),
+    0
+  );
+  if (liveFuel<= 0) {
+    alert(`⛽ Vehicle ${vehicle.regNo} has no fuel. Cannot start.`);
+  }
 
-    // 🔥 Optimistic UI fuel update
+  let liveSpeed = Math.floor(Math.random() * 121);
+
+  setSelectedVehicle({
+    ...vehicle,
+    liveLat,
+    liveLon,
+    liveFuel,
+    liveSpeed
+  });
+
+  // 🔥 Optimistic fuel update
+  setVehicles((prev) =>
+    prev.map((v) =>
+      v.regNo === vehicle.regNo ? { ...v, fuel: liveFuel } : v
+    )
+  );
+
+  // 🚨 Service alert
+  if (vehicle.distanceCovered >= 1000) {
+    alert(`🚨 Servicing Needed for\nVehicle: ${vehicle.regNo}`);
+  }
+
+  // ⏱️ Speed simulation
+  speedIntervalRef.current = setInterval(async () => {
+    // ⛽ STOP if fuel finished
+    if (liveFuel <= 0) {
+      clearInterval(speedIntervalRef.current);
+      speedIntervalRef.current = null;
+
+      setSelectedVehicle((prev) => ({
+        ...prev,
+        liveSpeed: 0,
+        liveFuel: 0
+      }));
+
+      alert(`⛽ Vehicle ${vehicle.regNo} stopped (Fuel Empty)`);
+
+      return;
+    }
+
+    // simulate fuel burn
+    liveFuel = Math.max(liveFuel - 1, 0);
+    liveSpeed = Math.floor(Math.random() * 121);
+
+    setSelectedVehicle((prev) => ({
+      ...prev,
+      liveSpeed,
+      liveFuel
+    }));
+
     setVehicles((prev) =>
       prev.map((v) =>
         v.regNo === vehicle.regNo ? { ...v, fuel: liveFuel } : v
       )
     );
-    if(vehicle.distanceCovered>=1000){
-      // setAlerts((prev) => [alertObj, ...prev]);
-      alert(
-        `🚨 Servicing Needed for \nVehicle: ${vehicle.regNo}`
-      );
-    }
 
-    // 🚨 Overspeed Alert (Frontend-only)
+    // 🚨 Overspeed alert
     if (liveSpeed >= 100) {
       const alertObj = {
         id: Date.now(),
@@ -131,9 +179,11 @@ export default function FleetManagerDashboard() {
       };
 
       setAlerts((prev) => [alertObj, ...prev]);
+
       alert(
         `🚨 Overspeeding Alert!\nVehicle: ${vehicle.regNo}\nSpeed: ${liveSpeed} km/h`
       );
+
       try {
         await fetch("http://localhost:8081/fleetManager/overSpeeding", {
           method: "POST",
@@ -144,29 +194,31 @@ export default function FleetManagerDashboard() {
           body: JSON.stringify({
             regNo: vehicle.regNo,
             time: alertObj.time,
-            speed: String(liveSpeed)   // backend expects String
+            speed: String(liveSpeed)
           })
         });
       } catch (err) {
         console.error("Overspeeding API failed", err);
       }
     }
+  }, 2000);
 
-    try {
-      await fetch(
-        `http://localhost:8081/fleetManager/updateVehicle?regNo=${vehicle.regNo}&fuel=${liveFuel}`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json"
-          }
+  // 🔁 backend fuel update (initial)
+  try {
+    await fetch(
+      `http://localhost:8081/fleetManager/updateVehicle?regNo=${vehicle.regNo}&fuel=${liveFuel}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
         }
-      );
-    } catch (e) {
-      console.error(e);
-    }
-  };
+      }
+    );
+  } catch (e) {
+    console.error(e);
+  }
+};
 
   /* ---------------------------------------
      DELETE VEHICLE
@@ -190,9 +242,17 @@ export default function FleetManagerDashboard() {
   };
 
   const closeModal = () => {
-    setSelectedVehicle(null);
-    loadVehicles();
-  };
+  if (speedIntervalRef.current) {
+    clearInterval(speedIntervalRef.current);
+    speedIntervalRef.current = null;
+  }
+
+  overspeedRef.current = false;
+  serviceAlertRef.current = false;
+
+  setSelectedVehicle(null);
+};
+
 
   /* ---------------------------------------
      RENDER

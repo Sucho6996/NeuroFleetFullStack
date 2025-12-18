@@ -22,15 +22,15 @@ public class Vehicle {
     protected double fuel;
     protected String status;
     protected String type;
-    protected long distanceCovered;
+    protected double distanceCovered;
     private String licenseNo;
 
 
-    public long getDistanceCovered() {
+    public double getDistanceCovered() {
         return distanceCovered;
     }
 
-    public void setDistanceCovered(long distanceCovered) {
+    public void setDistanceCovered(double distanceCovered) {
         this.distanceCovered = distanceCovered;
     }
 
