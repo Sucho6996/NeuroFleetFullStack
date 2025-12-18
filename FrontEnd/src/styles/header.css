@@ -1,0 +1,125 @@
+header{
+    overflow: visible !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 100px;
+    z-index: 1000 !important;
+    background: rgba(0, 0, 0, 0.5);
+}
+.logo{
+    font-size: 40px;
+    color: white;
+    letter-spacing: 2px;
+    font-weight: 800;
+    font-family: 'Bauhaus 93';
+}
+
+.menu{
+    color: white;
+    font-size: 2em;
+    transition: 0.5s;
+    z-index: 10000;
+}
+.nav{
+    display: flex;
+}
+.nav li {
+    position: relative;
+    list-style: none;
+    margin: 0 20px;
+}
+.nav li a{
+    color: white;
+    text-decoration: none;
+    text-transform: uppercase;
+    font-weight: 500;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: 0.5s;
+    font-weight: 300;
+    padding: 10px;
+}
+
+.nav li:hover a{
+    color: red;
+}
+
+.logout-btn {
+    background: #d9534f;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.logout-btn:hover {
+    background: #c9302c;
+}
+
+/* Mobile menu */
+.mobile-menu {
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.profile-btn {
+  background: white;
+  border: none;
+  font-size: 240px;
+  cursor: pointer;
+  color: white;      /* change if your navbar is dark */
+  /* margin-right: 10px; */
+}
+
+.profile-btn:hover {
+  transform: scale(1.08);
+  transition: 0.15s;
+}
+
+
+.profile-dropdown {
+  position: absolute;
+  top: 65px;
+  
+  width: 260px;
+  background: white;
+  border-radius: 10px;
+  padding: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  z-index: 100;
+  animation: fadeIn 0.2s ease-in;
+}
+
+.profile-dropdown p {
+  margin: 5px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.profile-btn i {
+  font-size: 24px;
+  color: rgb(149, 14, 14); /* adjust if navbar background is light */
+}
+.profile-btn.active i {
+  color: #4da3ff; /* highlight when dropdown open */
+}
+
+
