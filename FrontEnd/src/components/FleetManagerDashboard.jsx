@@ -108,9 +108,43 @@ export default function FleetManagerDashboard() {
     vehicle.fuel - (Math.floor(Math.random() * 2) + 1),
     0
   );
-  if (liveFuel<= 0) {
-    alert(`⛽ Vehicle ${vehicle.regNo} has no fuel. Cannot start.`);
+  // 🔁 backend fuel update (initial)
+  try {
+    await fetch(
+      `http://localhost:8081/fleetManager/updateVehicle?regNo=${vehicle.regNo}&fuel=${liveFuel}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+  } catch (e) {
+    console.error(e);
   }
+  if (liveFuel <= 0) {
+    setSelectedVehicle({
+      ...vehicle,
+      liveLat,
+      liveLon,
+      liveFuel: 0,
+      liveSpeed: 0
+    });
+
+    setVehicles((prev) =>
+      prev.map((v) =>
+        v.regNo === vehicle.regNo
+          ? { ...v, fuel: 0, status: "MAINTENANCE" }
+          : v
+      )
+    );
+
+
+    alert(`⛽ Vehicle ${vehicle.regNo} has no fuel. Cannot start.`);
+    return;
+  }
+
 
   let liveSpeed = Math.floor(Math.random() * 121);
 
@@ -147,13 +181,12 @@ export default function FleetManagerDashboard() {
         liveFuel: 0
       }));
 
-      alert(`⛽ Vehicle ${vehicle.regNo} stopped (Fuel Empty)`);
-
       return;
     }
 
+
     // simulate fuel burn
-    liveFuel = Math.max(liveFuel - 1, 0);
+    //liveFuel = Math.max(liveFuel - 1, 0);
     liveSpeed = Math.floor(Math.random() * 121);
 
     setSelectedVehicle((prev) => ({
@@ -175,7 +208,7 @@ export default function FleetManagerDashboard() {
         regNo: vehicle.regNo,
         type: "Overspeeding",
         speed: liveSpeed,
-        time: new Date().toLocaleTimeString()
+        time: new Date().toDateString() + " " + new Date().toLocaleTimeString()
       };
 
       setAlerts((prev) => [alertObj, ...prev]);
@@ -203,21 +236,7 @@ export default function FleetManagerDashboard() {
     }
   }, 2000);
 
-  // 🔁 backend fuel update (initial)
-  try {
-    await fetch(
-      `http://localhost:8081/fleetManager/updateVehicle?regNo=${vehicle.regNo}&fuel=${liveFuel}`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        }
-      }
-    );
-  } catch (e) {
-    console.error(e);
-  }
+  
 };
 
   /* ---------------------------------------

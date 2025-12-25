@@ -1,0 +1,3 @@
+# Ignore service configuration checked in per module
+**/src/main/resources/application.properties
+

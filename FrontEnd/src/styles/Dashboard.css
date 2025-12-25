@@ -286,3 +286,71 @@
   overflow-y: auto;        /* scroll inside modal if needed */
 }
 
+/* -------------------------
+   BOOK CAB FORM
+-------------------------- */
+.book-cab-form {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 15px;
+}
+
+/* Input fields */
+.book-cab-form input {
+  flex: 1;
+  min-width: 220px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #1c4e63;
+  background: #062b3d;
+  color: white;
+  font-size: 15px;
+  outline: none;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.book-cab-form input::placeholder {
+  color: #9bb7c8;
+}
+
+.book-cab-form input:focus {
+  border-color: #00d4ff;
+  box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.2);
+}
+
+/* Show Route button */
+.book-cab-form button {
+  padding: 12px 22px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #00d4ff, #0077ff);
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.book-cab-form button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(0, 119, 255, 0.35);
+}
+
+.book-cab-form button:active {
+  transform: scale(0.98);
+}
+
+/* Mobile friendly */
+@media (max-width: 600px) {
+  .book-cab-form {
+    flex-direction: column;
+  }
+
+  .book-cab-form button {
+    width: 100%;
+  }
+}
+

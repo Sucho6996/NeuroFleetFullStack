@@ -32,4 +32,4 @@ build/
 ### VS Code ###
 .vscode/
 
-E:\Desktop\InfoIntern\Infosys\neuro_fleet_back\FleetManager\src\main\resources\application.properties
+FleetManager\src\main\resources\application.properties
