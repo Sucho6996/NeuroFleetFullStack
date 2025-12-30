@@ -333,39 +333,51 @@ export default function FleetManagerDashboard() {
       )}
 
       {/* SEE VEHICLES */}
-      {activeTab === "seeVehicles" && (
-        <div className="vehicle-grid"
-        style={{marginTop:"100px",paddingTop:"0px"}}>
-          {vehicles.map((v) => (
-            <div
-              key={v.regNo}
-              className={`vehicle-card ${
-                v.status === "Maintenance" ? "disabled" : ""
-              }`}
-              onClick={() =>
-                v.status !== "Maintenance" && handleVehicleClick(v)
-              }
-            >
-              <h3>{v.regNo}</h3>
-              <p>{v.name} ({v.type})</p>
-              <p>Driver: {v.driverName}</p>
-              <p>Fuel: {v.fuel}%</p>
-              <p>Distance Travelled: {v.distanceCovered}</p>
-              <p>Status: {v.status}</p>
-              
-              <button
-                className="delete-btn"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  deleteVehicle(v.regNo);
-                }}
+        {activeTab === "seeVehicles" && (
+          <div
+            className="vehicle-grid"
+            style={{ marginTop: "100px", paddingTop: "0px" }}
+          >
+            {vehicles.map((v) => (
+              <div
+                key={v.regNo}
+                className={`vehicle-card ${
+                  v.status === "Maintenance" ? "disabled" : ""
+                }`}
+                onClick={() =>
+                  v.status !== "Maintenance" && handleVehicleClick(v)
+                }
               >
-                Delete
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
+                <h3>{v.regNo}</h3>
+
+                <p>
+                  {v.name} ({v.type})
+                </p>
+
+                <p><strong>Status:</strong> {v.status}</p>
+                <p><strong>Fuel:</strong> {v.fuel}%</p>
+                <p><strong>Distance Covered:</strong> {v.distanceCovered} km</p>
+
+                {/* 🔥 NEW HEALTH FIELDS */}
+                <p><strong>Engine Temp:</strong> {v.engineTemp} °C</p>
+                <p><strong>Tire Wear:</strong> {v.tireWear}%</p>
+                <p><strong>Battery Health:</strong> {v.batteryHealth}%</p>
+                <p><strong>Fuel Efficiency:</strong> {v.fuelEfficiency} km/l</p>
+
+                <button
+                  className="delete-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteVehicle(v.regNo);
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
 
       {/* MY LOCATION */}
       {activeTab === "myLocation" && (

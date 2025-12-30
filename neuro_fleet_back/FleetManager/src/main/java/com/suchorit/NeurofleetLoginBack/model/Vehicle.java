@@ -17,14 +17,39 @@ public class Vehicle {
     protected String email;
     protected String name;
     protected String location;
-//    protected Double latitude;
-//    protected Double longitude;
     protected double fuel;
     protected String status;
     protected String type;
     protected double distanceCovered;
+    protected double engineTemp;
+    protected double tireWear;
+    protected  double batteryHealth;
+    protected double fuelEfficiency;
     private String licenseNo;
 
+    public double getEngineTemp() {
+        return engineTemp;
+    }
+
+    public void setEngineTemp(double engineTemp) {
+        this.engineTemp = engineTemp;
+    }
+
+    public double getTireWear() {
+        return tireWear;
+    }
+
+    public void setTireWear(double tireWear) {
+        this.tireWear = tireWear;
+    }
+
+    public double getBatteryHealth() {
+        return batteryHealth;
+    }
+
+    public void setBatteryHealth(double batteryHealth) {
+        this.batteryHealth = batteryHealth;
+    }
 
     public double getDistanceCovered() {
         return distanceCovered;

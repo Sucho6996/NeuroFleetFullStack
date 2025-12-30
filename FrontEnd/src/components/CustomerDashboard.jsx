@@ -119,7 +119,7 @@ export default function CustomerDashboard() {
           lon + index * 0.0003
         ]),
         distance: (r.distance / 1000).toFixed(2),
-        time: r.duration / 60, // keep real value
+        time: r.duration / 60,
         color: colors[index] || "#666"
       }))
       .sort((a, b) => a.time - b.time)
