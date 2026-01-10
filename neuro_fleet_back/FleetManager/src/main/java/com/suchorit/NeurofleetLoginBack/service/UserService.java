@@ -3,6 +3,7 @@ package com.suchorit.NeurofleetLoginBack.service;
 
 import com.suchorit.NeurofleetLoginBack.controller.DriverFeign;
 import com.suchorit.NeurofleetLoginBack.model.*;
+import com.suchorit.NeurofleetLoginBack.repo.AlerttableRepo;
 import com.suchorit.NeurofleetLoginBack.repo.OverSpeedingRepo;
 import com.suchorit.NeurofleetLoginBack.repo.UserRepo;
 import com.suchorit.NeurofleetLoginBack.repo.VehicleRepo;
@@ -35,6 +36,8 @@ public class UserService {
     JwtService jwtService;
     @Autowired
     DriverFeign driverFeign;
+    @Autowired
+    AlerttableRepo alerttableRepo;
 
     private BCryptPasswordEncoder encoder=new BCryptPasswordEncoder(12);
 
@@ -177,5 +180,31 @@ public class UserService {
             response.put("message",e.getMessage());
         }
         return ResponseEntity.ok(response);
+    }
+
+    public ResponseEntity<Map<String,String>> addAllert(String authHeader, AlertTable alertTable) {
+        String token=authHeader.substring(7);
+        String email= jwtService.extractUserName(token);
+        Map<String,String> response=new HashMap<>();
+        try{
+            alertTable.setEmail(email);
+            alerttableRepo.save(alertTable);
+            response.put("message","Succesfully added");
+        }catch (Exception e){
+            response.put("message",e.getMessage());
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    public ResponseEntity<List<AlertTable>> showAllerts(String authHeader) {
+        List<AlertTable> alertTables=null;
+        String token=authHeader.substring(7);
+        String email= jwtService.extractUserName(token);
+        try {
+            alertTables=alerttableRepo.findAllByEmail(email);
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+        return ResponseEntity.ok(alertTables);
     }
 }

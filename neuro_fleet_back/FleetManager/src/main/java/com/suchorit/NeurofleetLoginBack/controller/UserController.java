@@ -1,10 +1,7 @@
 package com.suchorit.NeurofleetLoginBack.controller;
 
 
-import com.suchorit.NeurofleetLoginBack.model.FleetManagerData;
-import com.suchorit.NeurofleetLoginBack.model.OverSpeedingData;
-import com.suchorit.NeurofleetLoginBack.model.ShowVehicle;
-import com.suchorit.NeurofleetLoginBack.model.Vehicle;
+import com.suchorit.NeurofleetLoginBack.model.*;
 import com.suchorit.NeurofleetLoginBack.service.JwtService;
 import com.suchorit.NeurofleetLoginBack.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,5 +74,15 @@ public class UserController {
     @PostMapping("/overSpeeding")
     public ResponseEntity<Map<String,String>> overSpeeding(@RequestBody OverSpeedingData overSpeedingData){
         return userService.overSpeeding(overSpeedingData);
+    }
+
+    @PostMapping("/addAllert")
+    public ResponseEntity<Map<String,String>> addAllert
+            (@RequestHeader("Authorization") String authHeader, @RequestBody AlertTable alertTable){
+        return userService.addAllert(authHeader,alertTable);
+    }
+    @PostMapping("/showAllAllerts")
+    public ResponseEntity<List<AlertTable>> showAllerts(@RequestHeader("Authorization") String authHeader){
+        return userService.showAllerts(authHeader);
     }
 }
