@@ -1,4 +1,4 @@
-import background_img from './background.png';
+import background_img from './background.jpg';
 export const assets = {
     background_img
 }

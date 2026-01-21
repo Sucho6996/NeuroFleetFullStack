@@ -14,6 +14,7 @@ import CustomerDashboard from "./pages/Dashboards/CustomerDashboard.jsx";
 import DriverProfile from "./pages/Profiles/DriverProfile.jsx";
 import CustomerProfile from "./pages/Profiles/CustomerProfile.jsx";
 import FleetManagerDashboard from "./pages/Dashboards/FleetManagerDashboard.jsx";
+import FleetManagerAlerts from "./pages/Dashboards/FleetManagerAlerts.jsx";
 import FleetInventory from "./pages/Inventory/FleetInventory.jsx";
 
 // Layout
@@ -109,6 +110,14 @@ function App() {
             element={
               <MainLayout>
                 <FleetManagerProfile />
+              </MainLayout>
+            }
+          />
+          <Route
+            path="/fleetmanager/alerts"
+            element={
+              <MainLayout>
+                <FleetManagerAlerts />
               </MainLayout>
             }
           />

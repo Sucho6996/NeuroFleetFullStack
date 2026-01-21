@@ -64,14 +64,32 @@ export const deleteVehicle = async (regNo) => {
 
 // Add Alert
 export const addAlert = async (alertData) => {
-  const response = await fleetManagerApi.post("/addAllert", alertData);
+  const response = await fleetManagerApi.post("/fleetManager/addAllert", alertData);
   return response.data;
 };
 
 // Get All Alerts
 export const getAllAlerts = async () => {
-  const response = await fleetManagerApi.post("/showAllAllerts");
-  return response.data;
+  try {
+    const response = await fleetManagerApi.post("/fleetManager/showAllAllerts");
+    // Handle different response formats
+    if (response && response.data) {
+      // If response.data is already an array, return it
+      if (Array.isArray(response.data)) {
+        return response.data;
+      }
+      // If response.data has a data property, return that
+      if (response.data.data && Array.isArray(response.data.data)) {
+        return response.data.data;
+      }
+      // Otherwise return the whole response.data object
+      return response.data;
+    }
+    return response.data || [];
+  } catch (error) {
+    console.error("Error in getAllAlerts:", error);
+    throw error;
+  }
 };
 
 // Report Overspeeding

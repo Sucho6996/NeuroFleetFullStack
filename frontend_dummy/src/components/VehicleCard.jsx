@@ -3,32 +3,44 @@ import TelemetryBar from "./TelemetryBar";
 
 const VehicleCard = ({ vehicle, onEdit, onDelete, onView }) => {
   return (
-    <div className="bg-green-100 border border-green-400 rounded-xl p-4 space-y-3 relative">
+    <div className="bg-white/90 backdrop-blur-sm border border-slate-200/80 rounded-2xl p-4 space-y-3 relative shadow-sm hover:shadow-md transition-shadow">
 
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h3 className="font-semibold text-green-800">{vehicle.name}</h3>
-          <p className="text-xs text-gray-800">{vehicle.number}</p>
+          <h3 className="font-semibold text-slate-900">{vehicle.name}</h3>
+          <p className="text-xs text-slate-500">{vehicle.number}</p>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex gap-2.5">
           {onView && (
-            <button onClick={onView} className="text-green-600 hover:text-green-800" title="View Details">
+            <button
+              onClick={onView}
+              className="text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 rounded-full p-1 transition-colors"
+              title="View Details"
+            >
               <Eye size={18} />
             </button>
           )}
-          <button onClick={onEdit} className="text-blue-600 hover:text-blue-800" title="Edit">
+          <button
+            onClick={onEdit}
+            className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-full p-1 transition-colors"
+            title="Edit"
+          >
             <Pencil size={18} />
           </button>
-          <button onClick={onDelete} className="text-red-600 hover:text-red-800" title="Delete">
+          <button
+            onClick={onDelete}
+            className="text-red-600 hover:text-red-800 hover:bg-red-50 rounded-full p-1 transition-colors"
+            title="Delete"
+          >
             <Trash2 size={18} />
           </button>
         </div>
       </div>
 
       {/* Location */}
-      <div className="flex items-center gap-2 text-sm text-gray-600">
+      <div className="flex items-center gap-2 text-sm text-slate-500">
         <MapPin size={14} />
         {vehicle.location.city}
       </div>
@@ -42,7 +54,7 @@ const VehicleCard = ({ vehicle, onEdit, onDelete, onView }) => {
       )}
 
       {/* Speed */}
-      <p className="text-xs text-gray-700">
+      <p className="text-xs text-slate-600">
         Speed: <span className="font-medium">{vehicle.speed} km/h</span>
       </p>
     </div>
